@@ -1,0 +1,95 @@
+object Form1: TForm1
+  Left = 198
+  Height = 414
+  Top = 114
+  Width = 556
+  Caption = 'Visual - GDI and OpenGL tests'
+  ClientHeight = 414
+  ClientWidth = 556
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnPaint = FormPaint
+  OnResize = FormResize
+  LCLVersion = '1.4.2.0'
+  object Button1: TButton
+    Left = 464
+    Height = 46
+    Top = 8
+    Width = 82
+    Cancel = True
+    Caption = '&Quit'
+    OnClick = Button1Click
+    TabOrder = 0
+  end
+  object Button2: TButton
+    Left = 464
+    Height = 46
+    Top = 64
+    Width = 82
+    Caption = '&T'
+    OnClick = Button2Click
+    TabOrder = 1
+  end
+  object Button3: TButton
+    Left = 464
+    Height = 46
+    Top = 120
+    Width = 82
+    Caption = '&Fire'
+    OnClick = Button3Click
+    TabOrder = 2
+  end
+  object Image1: TImage
+    Left = 24
+    Height = 337
+    Top = 64
+    Width = 424
+    Stretch = True
+    Visible = False
+  end
+  object StaticText1: TStaticText
+    Left = 464
+    Height = 17
+    Top = 384
+    Width = 82
+    Alignment = taCenter
+    Caption = 'Version 1.0 (F)'
+    TabOrder = 4
+  end
+  object Button4: TButton
+    Left = 464
+    Height = 46
+    Top = 176
+    Width = 82
+    Caption = '&Image...'
+    OnClick = Button4Click
+    TabOrder = 3
+  end
+  object Label1: TLabel
+    Left = 49
+    Height = 31
+    Top = 17
+    Width = 399
+    Alignment = taCenter
+    AutoSize = False
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clBlack
+    Font.Height = -21
+    Font.Name = 'Tahoma'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+    Visible = False
+  end
+  object Timer1: TTimer
+    Enabled = False
+    OnTimer = Timer1Timer
+    left = 16
+    top = 8
+  end
+  object OpenDialog1: TOpenDialog
+    left = 16
+    top = 56
+  end
+end

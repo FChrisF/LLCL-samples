@@ -1,0 +1,146 @@
+object Form1: TForm1
+  Left = 198
+  Height = 208
+  Top = 114
+  Width = 631
+  Caption = 'Get a Web page using Indy'
+  ClientHeight = 208
+  ClientWidth = 631
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '1.4.2.0'
+  object Label1: TLabel
+    Left = 8
+    Height = 13
+    Top = 15
+    Width = 75
+    Caption = 'Web page URL:'
+    ParentColor = False
+  end
+  object Edit1: TEdit
+    Left = 90
+    Height = 21
+    Top = 15
+    Width = 418
+    TabOrder = 0
+  end
+  object Button1: TButton
+    Left = 514
+    Height = 39
+    Top = 15
+    Width = 110
+    Cancel = True
+    Caption = '&Quit'
+    Default = True
+    OnClick = Button1Click
+    TabOrder = 8
+  end
+  object Button2: TButton
+    Left = 8
+    Height = 30
+    Top = 72
+    Width = 71
+    Caption = '&Get'
+    OnClick = Button2Click
+    TabOrder = 2
+  end
+  object Memo1: TMemo
+    Left = 90
+    Height = 98
+    Top = 72
+    Width = 418
+    Lines.Strings = (
+      'Valid URL samples:'
+      ''
+      '- www.yahoo.com'
+      '- https://www.google.com'
+      '- http://www.indyproject.org/index.en.aspx'
+    )
+    ReadOnly = True
+    ScrollBars = ssBoth
+    TabOrder = 5
+  end
+  object StaticText1: TStaticText
+    Left = 520
+    Height = 19
+    Top = 181
+    Width = 104
+    Alignment = taCenter
+    Caption = 'Version 1.0 (F)'
+    TabOrder = 9
+  end
+  object CheckBox1: TCheckBox
+    Left = 520
+    Height = 17
+    Top = 65
+    Width = 104
+    AutoSize = False
+    Caption = '&Clear cookies'
+    Checked = True
+    State = cbChecked
+    TabOrder = 10
+  end
+  object CheckBox2: TCheckBox
+    Left = 520
+    Height = 17
+    Top = 88
+    Width = 104
+    AutoSize = False
+    Caption = '&Log all exchanges'
+    OnClick = CheckBox2Click
+    TabOrder = 11
+  end
+  object Button3: TButton
+    Left = 8
+    Height = 24
+    Top = 116
+    Width = 71
+    Caption = '&Post (Data)'
+    OnClick = Button3Click
+    TabOrder = 3
+  end
+  object Button4: TButton
+    Left = 8
+    Height = 24
+    Top = 146
+    Width = 71
+    Caption = 'Post (&File)'
+    OnClick = Button4Click
+    TabOrder = 4
+  end
+  object Edit2: TEdit
+    Left = 90
+    Height = 21
+    Top = 43
+    Width = 418
+    TabOrder = 1
+  end
+  object Label2: TLabel
+    Left = 8
+    Height = 13
+    Top = 43
+    Width = 80
+    Caption = 'Post string data:'
+    ParentColor = False
+  end
+  object StaticText2: TStaticText
+    Left = 8
+    Height = 19
+    Top = 179
+    Width = 71
+    Caption = 'Cookies:'
+    TabOrder = 6
+  end
+  object Edit3: TEdit
+    Left = 90
+    Height = 21
+    Top = 179
+    Width = 418
+    ReadOnly = True
+    TabOrder = 7
+  end
+  object OpenDialog1: TOpenDialog
+    left = 592
+    top = 112
+  end
+end

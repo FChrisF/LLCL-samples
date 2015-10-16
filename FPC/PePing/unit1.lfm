@@ -1,0 +1,135 @@
+object Form1: TForm1
+  Left = 198
+  Height = 165
+  Top = 114
+  Width = 561
+  Caption = 'Periodic Ping'
+  ClientHeight = 165
+  ClientWidth = 561
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnPaint = FormPaint
+  OnResize = FormResize
+  LCLVersion = '1.4.2.0'
+  object GroupBox1: TGroupBox
+    Left = 6
+    Height = 90
+    Top = 6
+    Width = 459
+    Caption = 'Host'
+    ClientHeight = 72
+    ClientWidth = 455
+    TabOrder = 2
+    object Label1: TLabel
+      Left = 6
+      Height = 13
+      Top = 6
+      Width = 41
+      Caption = 'Current:'
+      ParentColor = False
+    end
+    object StaticText1: TStaticText
+      Left = 62
+      Height = 22
+      Top = 6
+      Width = 306
+      BorderStyle = sbsSunken
+      TabOrder = 0
+    end
+    object Label2: TLabel
+      Left = 6
+      Height = 13
+      Top = 42
+      Width = 50
+      Caption = 'New Host:'
+      ParentColor = False
+    end
+    object Edit1: TEdit
+      Left = 62
+      Height = 21
+      Top = 42
+      Width = 306
+      TabOrder = 2
+    end
+    object Button3: TButton
+      Left = 374
+      Height = 26
+      Top = 38
+      Width = 80
+      Caption = '&Affect New'
+      OnClick = Button3Click
+      TabOrder = 3
+    end
+    object Button4: TButton
+      Left = 374
+      Height = 25
+      Top = 3
+      Width = 80
+      Caption = '&ReTest'
+      OnClick = Button4Click
+      TabOrder = 1
+    end
+  end
+  object Button1: TButton
+    Left = 472
+    Height = 25
+    Top = 11
+    Width = 80
+    Caption = '&Quit'
+    OnClick = Button1Click
+    TabOrder = 0
+  end
+  object Button2: TButton
+    Left = 472
+    Height = 32
+    Top = 40
+    Width = 80
+    Cancel = True
+    Caption = '&OK'
+    Default = True
+    OnClick = Button2Click
+    TabOrder = 1
+  end
+  object StaticText2: TStaticText
+    Left = 8
+    Height = 55
+    Top = 104
+    Width = 456
+    BorderStyle = sbsSunken
+    TabOrder = 3
+  end
+  object Label3: TLabel
+    Left = 472
+    Height = 16
+    Top = 143
+    Width = 80
+    Alignment = taCenter
+    AutoSize = False
+    Caption = 'Version 1.0 (F)'
+    ParentColor = False
+  end
+  object Timer1: TTimer
+    OnTimer = Timer1Timer
+    left = 88
+  end
+  object PopupMenu1: TPopupMenu
+    left = 128
+    object MenuItem1: TMenuItem
+      Caption = '&Show'
+      OnClick = MenuItem1Click
+    end
+    object MenuItem2: TMenuItem
+      Caption = '&Ping'
+      OnClick = MenuItem2Click
+    end
+    object MenuItem3: TMenuItem
+      Caption = '&Quit'
+      OnClick = MenuItem3Click
+    end
+  end
+  object TrayIcon1: TTrayIcon
+    PopUpMenu = PopupMenu1
+    OnDblClick = TrayIcon1DblClick
+    left = 176
+  end
+end
