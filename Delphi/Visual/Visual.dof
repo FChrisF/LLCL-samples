@@ -94,9 +94,9 @@ OutputDir=
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=llclunits
-Packages=vcl;rtl;vclx;VclSmp;vclshlctrls;IndyCore70;IndySystem70;IndyProtocols70
-Conditionals=
+SearchPath=.\LLCLUnits;.\PasZLib
+Packages=vcl;rtl;vclx;VclSmp;vclshlctrls
+Conditionals=LLCL_OPT_EXTENDGRAPHICAL
 DebugSourceDirs=
 UsePackages=0
 [Parameters]
@@ -130,12 +130,12 @@ OriginalFilename=
 ProductName=
 ProductVersion=1.0.0.0
 Comments=
-[Excluded Packages]
-C:\WINDOWS\system32\IndyCore70.bpl=Indy 10 Core
-C:\WINDOWS\system32\IndySystem70.bpl=Indy 10 System
+[HistoryLists\hlConditionals]
+Count=1
+Item0=LLCL_OPT_EXTENDGRAPHICAL
 [HistoryLists\hlUnitAliases]
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
 Count=1
-Item0=llclunits
+Item0=.\LLCLUnits;.\PasZLib

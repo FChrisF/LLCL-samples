@@ -8,7 +8,7 @@ unit Unit1;
 //        http://www.fatcow.com/free-icons)
 //
 
-// Copyright (c) 2015 ChrisF
+// Copyright (c) 2015-2016 ChrisF
 // Distributed under the terms of the MIT license: see LICENSE.txt
 
 {$IFDEF FPC}
@@ -134,7 +134,7 @@ procedure CAdd; forward;
 procedure TForm1.CreateParams(var Params : TCreateParams);
 begin
     inherited;
-    Form1.Edit1.InitialAlignment:=taRightJustify;
+    Form1.Edit1.Alignment:=taRightJustify;
 end;
 {$IFEND}
 {$ENDIF}

@@ -28,7 +28,7 @@ object Form1: TForm1
   object Label1: TLabel
     Left = 49
     Top = 17
-    Width = 399
+    Width = 367
     Height = 31
     Alignment = taCenter
     AutoSize = False
@@ -74,7 +74,7 @@ object Form1: TForm1
     Width = 74
     Height = 17
     Alignment = taCenter
-    Caption = 'Version 1.0 (D)'
+    Caption = 'Version 1.1 (D)'
     TabOrder = 4
   end
   object Button4: TButton
@@ -85,6 +85,14 @@ object Form1: TForm1
     Caption = '&Image...'
     TabOrder = 3
     OnClick = Button4Click
+  end
+  object StaticText2: TStaticText
+    Left = 49
+    Top = 120
+    Width = 367
+    Height = 180
+    AutoSize = False
+    TabOrder = 5
   end
   object Timer1: TTimer
     Enabled = False

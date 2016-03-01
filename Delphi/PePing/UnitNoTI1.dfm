@@ -23,7 +23,7 @@ object Form1: TForm1
     Height = 16
     Alignment = taCenter
     AutoSize = False
-    Caption = 'Version 1.0 (D)'
+    Caption = 'Version 1.1 (D)'
   end
   object GroupBox1: TGroupBox
     Left = 6

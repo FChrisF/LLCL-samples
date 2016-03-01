@@ -23,17 +23,17 @@ unit Unit1;
 //      This is mandatory because Indy uses the standard
 //      Classes.pas file
 //
-// 2) The SysUtils.pas file used must be the 'standard' one for
-//      Lazarus/FPC and Delphi (because of Indy): so, delete or
-//      rename the one coming from the LLCL units before the
-//      compilation
+// 2) The SysUtils.pas and IniFiles.pas files used must be the
+//      'standard' ones for Lazarus/FPC and Delphi (because of Indy):
+//      so, delete or rename the ones coming from the LLCL units before
+//      the compilation
 //
 // 3) The Variants.pas file used must be the 'standard' one for
 //      Delphi: so, delete or rename the one coming from the LLCL
 //      units before the compilation
 //
 
-// Copyright (c) 2015 ChrisF
+// Copyright (c) 2015-2016 ChrisF
 // Distributed under the terms of the MIT license: see LICENSE.txt
 
 {$IFDEF FPC}
@@ -47,7 +47,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, StdCtrls, Dialogs,
-  {$IFNDEF FPC} XPMan{$ELSE} FileUtil{$ENDIF};
+  {$IFNDEF FPC} XPMan{$ELSE} LazUTF8{$ENDIF};
 
 type
 

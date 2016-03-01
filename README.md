@@ -23,6 +23,15 @@ sample in README.txt).
 ## Using only the LLCL
 
 
+### CompFiles
+
+Compare and search for identical files (same size and same
+content) between 2 directories, or inside 1 directory.
+
+[![CompFiles screenshot](https://FChrisF.github.io/LLCL-samples/captures/compfiles-screen-th.png)](https://FChrisF.github.io/LLCL-samples/captures/compfiles-screen.png)
+[![CompFiles results](https://FChrisF.github.io/LLCL-samples/captures/compfiles-results-th.png)](https://FChrisF.github.io/LLCL-samples/captures/compfiles-results.png)
+
+
 ### FileCRC
 
 CRC32 and hash computes (MD5/SHA-1) for a file chosen by the
@@ -80,17 +89,28 @@ and the LLCL versions for the different sample projects
 
   Executables have been build with the same conditions in each
 cases: architecture (32 bits), debugging (no debugging),
-optimization level, icon files, ...
+optimization level, icon files, FPC version ...
 
 
-|Project          | LCL (Lazarus 1.4.2) | LLCL Free Pascal | VCL (Delphi7) | LLCL Delphi |
+|Project          | LCL (Lazarus 1.4.4) | LLCL Free Pascal | VCL (Delphi7) | LLCL Delphi |
 |:----------------|:-------------------:|:----------------:|:-------------:|:-----------:|
-|Demo LLCLTest(1) |       1717 Kb       |      140 Kb      |    464 Kb     |    89 Kb    |
-|FileCRC          |       1695 Kb       |      140 Kb      |    402 Kb     |    90 Kb    |
-|MiniCalc         |       1651 Kb       |      118 Kb      |    379 Kb     |    75 Kb    |
-|PePing           |       1685 Kb       |      134 Kb      |     (3)       |    87 Kb    |
-|Visual           |       1706 Kb       |      186 Kb      |    404 Kb     |    85 Kb    |
-|GetWebPage(2)    |       2233 Kb       |      809 Kb      |    830 Kb     |   590 Kb    |
+|Demo LLCLTest(1) |       1721 Kb       |      141 Kb      |    464 Kb     |    89 Kb    |
+|CompFiles        |       1888 Kb       |      163 Kb      |    465 Kb     |   101 Kb    |
+|FileCRC          |       1696 Kb       |      141 Kb      |    402 Kb     |    90 Kb    |
+|MiniCalc         |       1652 Kb       |      118 Kb      |    379 Kb     |    75 Kb    |
+|PePing           |       1699 Kb       |      141 Kb      |     (3)       |    92 Kb    |
+|Visual(4)        |       1707 Kb       |      212 Kb      |    404 Kb     |   106 Kb    |
+|GetWebPage(2)    |       2237 Kb       |      813 Kb      |    830 Kb     |   590 Kb    |
+
+|Project          | LCL (Lazarus 1.6.0) | LLCL Free Pascal |
+|:----------------|:-------------------:|:----------------:|
+|Demo LLCLTest(1) |       1726 Kb       |      129 Kb      |
+|CompFiles        |       1969 Kb       |      149 Kb      |
+|FileCRC          |       1702 Kb       |      129 Kb      |
+|MiniCalc         |       1662 Kb       |      108 Kb      |
+|PePing           |       1709 Kb       |      129 Kb      |
+|Visual(4)        |       1716 Kb       |      207 Kb      |
+|GetWebPage(2)    |       2077 Kb       |      776 Kb      |
 
 
 Notes:
@@ -101,3 +121,5 @@ Notes:
 3. because of the TTrayIcon component, this sample can't be
    compiled with the standard VCL with the old versions of
    Delphi (i.e. before Delphi 2006)
+4. PNG images support included into the LLCL Delphi version,
+   while not into the standard VCL one.

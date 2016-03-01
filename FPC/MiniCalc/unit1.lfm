@@ -11,7 +11,7 @@ object Form1: TForm1
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   Position = poDesktopCenter
-  LCLVersion = '1.4.2.0'
+  LCLVersion = '1.4.4.0'
   object Edit1: TEdit
     Left = 7
     Height = 21

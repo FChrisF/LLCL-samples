@@ -25,6 +25,16 @@ Using only the LLCL
 ===================
 
 
+CompFiles
+---------
+Compare and search for identical files (same size and same
+content) between 2 directories, or inside 1 directory: basic
+and dialog controls, progress bar control, string grid control
+and several forms.
+. conditional option to use a thread (to allow the user to
+  cancel the comparison).
+
+
 FileCRC
 -------
 CRC32 and hash computes (MD5/SHA-1) for a file chosen by the
@@ -49,11 +59,10 @@ Using the LLCL and the Windows APIs
 
 PePing
 ------
-Periodic ping for a given URL: basic controls, popup menu and
-SysTray.
-. uses Windows APIs to read data from a .ini file, to load
-  various icon files, to translate the given URL to an IP
-  address and to process the ping,
+Periodic ping for a given URL: basic controls, .ini file
+using, popup menu and SysTray.
+. uses Windows APIs to load various icon files, to translate
+  the given URL to an IP address and to process the ping,
 . for Free Pascal, requires Lazarus 1.2+ if compiled with the
   standard LCL (bug for icon changes in TTrayIcon component),
 . as old versions of Delphi don't have a TTrayIcon component,
@@ -73,7 +82,12 @@ GDI APIs, and the few differences with the standard LCL/VCL.
 . uses GDI Windows APIs and GL/OpenGL APIs,
 . for Free Pascal, the OpenGL interface requires the standard
   SysUtils unit. So, the SysUtils unit coming from the LLCL
-  must be deleted or renamed before the compilation.
+  must be deleted or renamed before the compilation,
+. PNG images support requires a specific option for the LLCL
+  (not enabled by default). This option can either been set
+  using the LLCL option file (LLCLOptions.inc), or by defining
+  it directly into the project option (which is the case for
+  this sample).
 
 
 Using a modified version of the LLCL (standard Classes unit)
@@ -94,9 +108,9 @@ of the LLCL must be used.
   LLCL units to modify,
 . the size of the final executable if still big, because of
   the intrinsic Indy library size,
-. Indy requires the standard SysUtils unit. So, the SysUtils
-  unit coming from the LLCL must be deleted or renamed before
-  the compilation. As for the Variants unit for Delphi,
+. Indy requires the standard IniFiles and SysUtils units. So,
+  the units coming from the LLCL must be deleted or renamed
+  before the compilation. As for the Variants unit for Delphi,
 . requires the OpenSSL .dll files (libeay32.dll, ssleay32.dll)
   for HTTPS URLs,
 . for Free Pascal, requires the zlib library (zlib1.dll) to

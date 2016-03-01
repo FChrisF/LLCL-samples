@@ -178,7 +178,7 @@ var OutFileT: TextFile;
 var lError: Boolean;
 begin
   result := False;
-  // Checks if Pascal File is PResent
+  // Checks if Pascal File is Present
   if not FileExists(NameIn) then
     Exit;
   // Open Text Input File

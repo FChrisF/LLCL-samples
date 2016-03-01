@@ -5,7 +5,7 @@ unit Unit1;
 //   (Indicate a valid search path for the LLCL files before compiling)
 //
 
-// Copyright (c) 2015 ChrisF
+// Copyright (c) 2015-2016 ChrisF
 // Distributed under the terms of the MIT license: see LICENSE.txt
 
 {$IFDEF FPC}
@@ -20,7 +20,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, StdCtrls, Dialogs, ExtCtrls,
-  {$IFNDEF FPC} XPMan{$ELSE} FileUtil{$ENDIF};
+  {$IFNDEF FPC} XPMan{$ELSE} LazUTF8{$ENDIF};
 
 type
 
@@ -78,7 +78,7 @@ uses
 procedure DispMessage(Const StrMess: String); forward;
 procedure DispError(Const ErrMess: String); forward;
 
-procedure DoCRCHashFile(Const FileName: String; const MD5Too: Boolean; Const SHA1Too: Boolean; Var ResType: Integer; Var ResStr: String); forward;
+procedure DoCRCHashFile(Const FileName: String; Const MD5Too: Boolean; Const SHA1Too: Boolean; Var ResType: Integer; Var ResStr: String); forward;
 
 {$IFDEF USE_THREAD}
 type
@@ -87,12 +87,13 @@ type
     FileName: String;
     MD5Too: Boolean;
     SHA1Too: Boolean;
+    TimerThr: TTimer;
     procedure OnThreadTerminate(Sender: TObject);
   public
     procedure Execute; override;
   end;
 
-function  CallDoCRCHashFileThr(Const FileName: String; const MD5Too: Boolean; Const SHA1Too: Boolean): Boolean; forward;
+function  CallDoCRCHashFileThr(Const FileName: String; Const MD5Too: Boolean; Const SHA1Too: Boolean): Boolean; forward;
 procedure ResDoCRCHashFileThr; forward;
 {$ENDIF}
 
@@ -216,7 +217,7 @@ end;
 //
 // Calls CRC/Hash Thread
 //
-function  CallDoCRCHashFileThr(Const FileName: String; const MD5Too: Boolean; Const SHA1Too: Boolean): Boolean;
+function  CallDoCRCHashFileThr(Const FileName: String; Const MD5Too: Boolean; Const SHA1Too: Boolean): Boolean;
 begin
   // Creates thread
   result:=False;
@@ -230,7 +231,7 @@ begin
     Exit;
   end;
   result:=True;
-  // Initialization
+  // Initializations
   Form1.Button1.Enabled:=False;
   Form1.Button2.Caption:='&Abort';
   Form1.CheckBox1.Enabled:=False;
@@ -243,9 +244,19 @@ begin
   DoCRCHashFileThr.FileName:=FileName;
   DoCRCHashFileThr.MD5Too:=MD5Too;
   DoCRCHashFileThr.SHA1Too:=SHA1Too;
+  DoCRCHashFileThr.TimerThr:=Form1.Timer1;
   // Starts thread
   ThreadIsRunning:=True;
-  DoCRCHashFileThr.Resume;  // Resume is deprecated since Delphi 2010+ and FPC 2.4.4 (Start should be used instead)
+  // Resume is deprecated since Delphi 2010+ and FPC 2.4.4 (Start should be used instead)
+{$IFDEF FPC}
+  DoCRCHashFileThr.Start;
+{$ELSE FPC}
+  {$if CompilerVersion >= 21}       // Delphi 2010 or after
+  DoCRCHashFileThr.Start;
+  {$else}
+  DoCRCHashFileThr.Resume;
+  {$ifend}
+{$ENDIF FPC}
 end;
 
 //
@@ -274,7 +285,7 @@ procedure TDoCRCHashFileThr.OnThreadTerminate(Sender: TObject);
 begin
   // Function run into calling thread for LLCL: can't use LLCL directly
   // Timer started
-  Form1.Timer1.Enabled:=True;
+  TimerThr.Enabled:=True;
 end;
 {$ENDIF}
 
@@ -282,7 +293,7 @@ end;
 // CRC/Hashes for a file
 //   Computes CRC32 value, and eventually MD5/SHA-1 hashes
 //
-procedure DoCRCHashFile(Const FileName: String; const MD5Too: Boolean; Const SHA1Too: Boolean; Var ResType: Integer; Var ResStr: String);
+procedure DoCRCHashFile(Const FileName: String; Const MD5Too: Boolean; Const SHA1Too: Boolean; Var ResType: Integer; Var ResStr: String);
 var sFileName: string;
 var LenFile,SaveLenFile: Int64;
 var LenToRead: Longword;
@@ -304,7 +315,7 @@ var F1: File;
 var s1: String;
 begin
   ResType:=1;   // (error by default)
-  // Error, if file asbent
+  // Error, if file absent
   sFileName:={$if Defined(FPC) and not Defined(UNICODE)}UTF8ToSys(FileName){$else}FileName{$ifend};
   if not FindFileSize(sFileName,LenFile) then
     begin
@@ -403,12 +414,12 @@ begin
     if FileError=20 then
       begin
         if (not ThreadFormDestroy) then
-          ResStr:=' File: '+FileName+sLineBreak+sLineBreak+' Operation aborted by user'
+          ResStr:=' File: '+FileName+sLineBreak+sLineBreak+' Operation aborted by user';
       end
     else
     {$ENDIF}
-    // Error during file processing
-    ResStr:=' Can''t process file: '+FileName+' (Error '+IntToStr(FileError)+')';
+      // Error during file processing
+      ResStr:=' Can''t process file: '+FileName+' (Error '+IntToStr(FileError)+')';
 end;
 
 //

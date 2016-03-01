@@ -15,8 +15,20 @@ unit Unit1;
 //      Lazarus/FPC (because of GL.pas): so, delete or rename the
 //      one coming from the LLCL units before the compilation
 //
+// 3) This sample requires the LLCL to be compiled with the
+//     LLCL_OPT_EXTENDGRAPHICAL option (see option file LLCLOptions.inc).
+//     This option permits the support of PNG files, transparent
+//     images/bitmaps and double buffering painting (to avoid flickerings).
+//
+//     Concerning the PNG files support, by default the Zlib decompression
+//     is done by with pure Pascal code (PasZlib); some other options are
+//     available (see LLCL_OPT_USEZLIBxxx in LLCLOptions.inc). For Delphi,
+//     as there is no such possibility, either an external PasZlib package
+//     must be provided (for instance http://sageshome.net/oss/paszlib-sg.php),
+//     or another Zlib option must be used.
+//
 
-// Copyright (c) 2015 ChrisF
+// Copyright (c) 2015-2016 ChrisF
 // Distributed under the terms of the MIT license: see LICENSE.txt
 
 
@@ -47,6 +59,7 @@ type
     Label1: TLabel;
     OpenDialog1: TOpenDialog;
     StaticText1: TStaticText;
+    StaticText2: TStaticText;
     Timer1: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -57,13 +70,6 @@ type
     procedure Button3Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
-  protected
-{$IF Declared(LLCLVersion)}   // Can't put it just after the 'uses' clause (bug for FPC 2.6.x)
-  {$define ImageNoFlick}
-{$IFEND}
-{$ifdef ImageNoFlick}
-    procedure WMEraseBkGnd(var Msg: TWMEraseBkGnd); message WM_ERASEBKGND;
-{$endif}
   private
     { private declarations }
   public
@@ -72,12 +78,6 @@ type
 
 var
   Form1: TForm1;
-
-{$ifdef ImageNoFlick}
-type
-  TPPicture = class(TPicture);      // To access to protected part
-  TPLabel = class(TLabel);          //
-{$endif}
 
 //------------------------------------------------------------------------------
 
@@ -142,13 +142,6 @@ procedure FireEvent(); forward;
 procedure FE_Glow(Const cr, cg, cb, ca, rr, rg, rb, ra, Size: GLFloat); forward;
 procedure FireStop(Const hForm: THandle); forward;
 
-{$ifdef ImageNoFlick}
-var
-  ImageStep:        Integer = 0;    // Not running
-
-procedure IPaintForm(const aForm: TForm; const aImage: TImage; const aLabel: TLabel; aHDC: HDC); forward;
-{$endif}
-
 //------------------------------------------------------------------------------
 
 procedure ModifyButton(Const CurButton: TObject; Const State: Boolean; Const NewCaption: String);
@@ -175,8 +168,24 @@ procedure TForm1.FormCreate(Sender: TObject);
 begin
   FillChar(TContext, SizeOf(TContext), 0);
   FillChar(FireContext, SizeOf(FireContext), 0);
-  ImageContext.HeightDiff := Form1.Height-Form1.Image1.Height;
-  ImageContext.WidthDiff := Form1.Width-Form1.Image1.Width;
+  ImageContext.HeightDiff := Height - Image1.Height;
+  ImageContext.WidthDiff := Width - Image1.Width;
+  // (Double buffering requires LLCL_OPT_DOUBLEBUFF in LLCLOptions.inc)
+  DoubleBuffered := True;
+{$IF Declared(LLCLVersion) and Not Defined(LLCL_OPT_EXTENDGRAPHICAL)}
+  // A message to indicate that the LLCL has to be compiled with
+  // the LLCL_OPT_EXTENDGRAPHICAL option (no way to check it here),
+  // as mentioned in the header note 3 of this program.
+  //
+  // LLCL_OPT_EXTENDGRAPHICAL is defined in this project options,
+  // which is also another way to declare LLCL options
+  StaticText2.Caption :=
+  'Important note:' + sLineBreak + sLineBreak +
+  'If you experiment flickerings, or if PNG files can''t be loaded, or' + sLineBreak +
+  'if transparency images are not rendered properly, it means that the' + sLineBreak +
+  'LLCL has not been compiled with the "Extended graphical options".' + sLineBreak + sLineBreak +
+  'See LLCL_OPT_EXTENDGRAPHICAL in option file LLCLOptions.inc';
+{$IFEND}
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -191,36 +200,27 @@ end;
 procedure TForm1.FormPaint(Sender: TObject);
 begin
   if IsTRunning then
-    TPaintForm(Form1.Handle, Canvas.Handle)
-  else
-{$ifdef ImageNoFlick}
-    if IsImageRunning then
-      begin
-        if ImageStep=2 then     // Image running step 2 (non LLCL - no flickerings)
-          IPaintForm(Form1, Form1.Image1, Form1.Label1, Canvas.Handle);
-      end;
-{$ELSE}
-    ;
-{$endif}
+    TPaintForm(Form1.Handle, Canvas.Handle);
 end;
 
 procedure TForm1.FormResize(Sender: TObject);
 var i1, i2: Integer;
 begin
-  i2 := Form1.Height-ImageContext.HeightDiff;
+  i2 := Height - ImageContext.HeightDiff;
   if i2<0 then i2 := 0;
-  i1 := Form1.Width-ImageContext.WidthDiff;
+  i1 := Width - ImageContext.WidthDiff;
   if i1<0 then i1 := 0;
   Image1.SetBounds(Image1.Left, Image1.Top, i1, i2);
 end;
 
 procedure TForm1.Button1Click(Sender: TObject);   // Quit
 begin
-    Application.Terminate;
+  Application.Terminate;
 end;
 
 procedure TForm1.Button2Click(Sender: TObject);   // T
 begin
+  StaticText2.Visible := False;
   IsTRunning := not IsTRunning;
   if not IsTRunning then        // End
     begin
@@ -240,6 +240,7 @@ end;
 
 procedure TForm1.Button3Click(Sender: TObject);   // Fire
 begin
+  StaticText2.Visible := False;
   IsFireRunning := not IsFireRunning;
   if not IsFireRunning then     // End
     begin
@@ -267,14 +268,7 @@ end;
 procedure TForm1.Button4Click(Sender: TObject);
 var BitmapLoaded: Boolean;
 begin
-{$ifdef ImageNoFlick}
-  if ImageStep=1 then     // Running step 1
-    begin
-      ModifyButton(Sender, False, '&End');
-      ImageStep := 2;
-      Exit;
-    end;
-{$endif}
+  StaticText2.Visible := False;
   IsImageRunning := not IsImageRunning;
   if not IsImageRunning then    // End
     begin
@@ -282,13 +276,15 @@ begin
         Image1.Picture := nil;
       Label1.Visible := False;
       ModifyButton(Sender, True, '&Image...');
-      Image1.Hide;
+      Image1.Visible := False;
     end
   else                          // Begin
     begin
       // Load an image from an external file
       OpenDialog1.Options := OpenDialog1.Options+[ofPathMustExist, ofFileMustExist];
-      OpenDialog1.Filter := 'Bitmap Files (*.bmp)|*.bmp|';
+      // (PNG files support requires LLCL_OPT_PNGSUPPORT in LLCLOptions.inc)
+      // (Transparency support requires LLCL_OPT_IMGTRANSPARENT in LLCLOptions.inc)
+      OpenDialog1.Filter := 'Bitmap Files (*.bmp)|*.bmp|PNG Files (*.png)|*.png';
       // Exit if no file selected
       if not OpenDialog1.Execute then
         begin
@@ -309,15 +305,10 @@ begin
           IsImageRunning := False;
           Exit;
         end;
-{$ifdef ImageNoFlick}
-      ImageStep := 1;     // Running step 1 (LLCL - flickerings)
-      ModifyButton(Sender, False, '&No flickerings');
-{$else}
       ModifyButton(Sender, False, '&End');
-{$endif}
       Label1.Caption := '(Resize the form)';
       Label1.Visible := True;
-      Image1.Show;
+      Image1.Visible := True;
     end;
 end;
 
@@ -329,21 +320,6 @@ begin
     if IsFireRunning then
       FireEvent();
 end;
-
-{$ifdef ImageNoFlick}
-procedure TForm1.WMEraseBkGnd(var Msg: TWMEraseBkGnd);
-begin
-  if IsImageRunning then
-    begin
-      if ImageStep=2 then     // Image running step 2 (non LLCL - no flickerings)
-        begin
-          Msg.Result := 1;      // Invalidates standard Windows process
-          Exit;
-        end;
-    end;
-  inherited;
-end;
-{$endif}
 
 //------------------------------------------------------------------------------
 
@@ -402,41 +378,28 @@ end;
 //
 procedure TPaintForm(aFormHandle: THandle; aHDC: HDC);
 var aRect, fRect: TRECT;
-var hdcMem: HDC;
-var hbmMem, hbmOld: HBITMAP;
 var ahBrush: HBRUSH;
 var fClientX, fClientY: Integer;
 var i: Integer;
 begin
   if TContext.PalStatus=0 then Exit;  // Sanity
+  // (Double buffering done inside LLCL - see LLCL_OPT_DOUBLEBUFF in LLCLOptions.inc)
   SelectPalette(aHDC, TContext.aPalette, False);
   RealizePalette(aHDC);
   GetClientRect(aFormHandle, fRect);
   fClientX := fRect.Right - fRect.Left;
   fClientY := fRect.Bottom - fRect.Top;
-  // Double buffering
-  hdcMem := CreateCompatibleDC(aHDC);
-  SelectPalette(hdcMem, TContext.aPalette, False);
-  RealizePalette(hdcMem);
-  hbmMem := CreateCompatibleBitmap(aHDC, fClientX, fClientY);
-  hbmOld := SelectObject(hdcMem, hbmMem);
-  // Draws shapes (using double buffering)
+  // Draws shapes
   for i := 0 to Pred(128) do
     begin
       arect.Left := ((i*fClientX) div 255);
       arect.Top := ((i*fClientY) div 255);
-      arect.Right := fClientX-((i*fClientX) div 255);
-      arect.Bottom := fClientY-((i*fClientY) div 255);
+      arect.Right := fClientX - ((i*fClientX) div 255);
+      arect.Bottom := fClientY - ((i*fClientY) div 255);
       ahBrush := CreateSolidBrush(PALETTEINDEX(i));
-      FillRect(hdcMem, arect, ahBrush);
+      FillRect(aHDC, arect, ahBrush);
       DeleteObject(ahBrush);
     end;
-  // Copies the computed image
-  BitBlt(aHDC, fRect.Left, fRect.Top, fClientX, fClientY, hdcMem, 0, 0, SRCCOPY);
-  // Restores and cleans all
-  SelectObject(hdcMem, hbmOld);
-  DeleteObject(hbmMem);
-  DeleteDC(hdcMem);
 end;
 
 //------------------------------------------------------------------------------
@@ -548,44 +511,6 @@ begin
     WGLDeleteContext(FireContext.ORC);
   FireContext.Status := 0;
 end;
-
-//------------------------------------------------------------------------------
-
-{$ifdef ImageNoFlick}
-//
-// Image Step 2 - No flickerings
-//
-procedure IPaintForm(const aForm: TForm; const aImage: TImage; const aLabel: TLabel; aHDC: HDC);
-var fRect, iRect: TRECT;
-var hdcMem: HDC;
-var hbmMem, hbmOld: HBITMAP;
-var fClientX, fClientY: Integer;
-begin
-  GetClientRect(aForm.Handle, fRect);
-  fClientX := fRect.Right - fRect.Left;
-  fClientY := fRect.Bottom - fRect.Top;
-  iRect := aImage.ClientRect();
-  // Double buffering
-  hdcMem := CreateCompatibleDC(aHDC);
-  hbmMem := CreateCompatibleBitmap(aHDC, fClientX, fClientY);
-  hbmOld := SelectObject(hdcMem, hbmMem);
-  aForm.Canvas.Handle := hdcMem;
-  // Clears form
-  Windows.FillRect(hdcMem, fRect, aForm.Canvas.Brush.Handle);
-  // Draws current graphical controls (not standard)
-  aLabel.Canvas.Handle := aForm.Canvas.Handle;
-  TPLabel(aLabel).Paint;
-  // Draws picture (not standard)
-  TPPicture(aImage.Picture).DrawRect(iRect, aForm.Canvas, aImage.Stretch);
-  // Copies the computed image
-  BitBlt(aHDC, fRect.Left, fRect.Top, fClientX, fClientY, hdcMem, 0, 0, SRCCOPY);
-  // Restores and cleans all
-  aForm.Canvas.Handle := aHDC;
-  SelectObject(hdcMem, hbmOld);
-  DeleteObject(hbmMem);
-  DeleteDC(hdcMem);
-end;
-{$endif}
 
 end.
 

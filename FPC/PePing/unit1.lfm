@@ -10,7 +10,7 @@ object Form1: TForm1
   OnDestroy = FormDestroy
   OnPaint = FormPaint
   OnResize = FormResize
-  LCLVersion = '1.4.2.0'
+  LCLVersion = '1.4.4.0'
   object GroupBox1: TGroupBox
     Left = 6
     Height = 90
@@ -105,7 +105,7 @@ object Form1: TForm1
     Width = 80
     Alignment = taCenter
     AutoSize = False
-    Caption = 'Version 1.0 (F)'
+    Caption = 'Version 1.1 (F)'
     ParentColor = False
   end
   object Timer1: TTimer

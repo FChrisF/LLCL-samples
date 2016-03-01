@@ -4,11 +4,11 @@ unit Unit1;
 // Periodic ping for a given URL
 //   (Indicate a valid search path for the LLCL files before compiling)
 //
-//   Notes: - LLCL_OPT_TOPFORM must be defined for this sample
+//   Notes: - LLCL_OPT_TOPFORM must be defined (LLCL by default) for this sample
 //          - can be compiled with the standard VCL only for Delphi 2006+
 //
 
-// Copyright (c) 2015 ChrisF
+// Copyright (c) 2015-2016 ChrisF
 // Distributed under the terms of the MIT license: see LICENSE.txt
 
 {$IFDEF FPC}
@@ -79,6 +79,7 @@ var
 implementation
 
 uses
+  IniFiles,
   Winsock;
 
 {$IFDEF FPC}
@@ -93,13 +94,19 @@ const
   // Current directory
   CUR_DIR = {$IFDEF MSWINDOWS}'.\'{$ELSE}'./'{$ENDIF};
 
+  INI_FILE        = CUR_DIR + 'PePing.ini';
+  INI_OPTIONS     = 'Options';
+  INI_OURL        = 'URL';
+  INI_OURLDEF     = 'google.com';
+  INI_OTIMEINT    = 'Timer';
+  INI_OTIMEINTDEF = 120;
+
 type
   // TrayIcon states
   TATI_STATES = (ATIS_Query, ATIS_OK, ATIS_KO);
 
 procedure ReadIniFile(); forward;
-function  RIF_ReadString(Const FileName: String; Const AppName: String;
-           Const KeyName: String; Const DefaultStr: String): String; forward;
+procedure WriteIniFileHost(const NewHostURL: string); forward;
 procedure CheckDataAndStart(); forward;
 procedure TrayIconState(Const NewState: TATI_STATES); forward;
 
@@ -183,8 +190,9 @@ begin
   else
     begin
       // New Host URL - Calls for a Ping
-      //    (.Ini file is not updated)
+      //    (.Ini file is updated, though the new Host URL might be invalid)
       CurHostURL:=s1;
+      WriteIniFileHost(s1);
       CheckDataAndStart();
     end;
 end;
@@ -207,7 +215,7 @@ end;
 procedure TForm1.Timer1Timer(Sender: TObject);
 begin
   // Timer fall (Simulates click for PushButton 4 - Could also call PushButton 4 click event directly)
-  PostMessage(Form1.Handle,WM_COMMAND,MAKEWPARAM(0,BN_CLICKED),Form1.Button4.Handle);
+  PostMessage(Form1.Button4.Parent.Handle,WM_COMMAND,MAKEWPARAM(0,BN_CLICKED),Form1.Button4.Handle);
 end;
 
 procedure TForm1.MenuItem1Click(Sender: TObject);
@@ -258,32 +266,28 @@ end;
 // Reads Host URL and Timer Interval from .INI file
 //
 procedure ReadIniFile();
-const
-    INI_FILE        = CUR_DIR+'PePing.ini';
-    INI_OPTIONS     = 'Options';
-    INI_OURL        = 'URL';
-    INI_OURLDEF     = 'google.com';
-    INI_OTIMEINT    = 'Timer';
-    INI_OTIMEINTDEF = '120';
-var i1,i2: Integer;
-var s1: String;
+var IniF: TIniFile;
 begin
+  IniF:=TIniFile.Create(INI_FILE);
   // Host URL
-  CurHostURL:=RIF_ReadString(INI_FILE,INI_OPTIONS,INI_OURL,INI_OURLDEF);
+  CurHostURL:=IniF.ReadString(INI_OPTIONS,INI_OURL,INI_OURLDEF);
   // Timer Interval
-  s1:=RIF_ReadString(INI_FILE,INI_OPTIONS,INI_OTIMEINT,INI_OTIMEINTDEF);
-  Val(s1,i1,i2); if i2<>0 then Val(INI_OTIMEINTDEF,i1,i2);
-  TimerInt:=i1*1000;
+  TimerInt:=IniF.ReadInteger(INI_OPTIONS,INI_OTIMEINT,INI_OTIMEINTDEF)*1000;
+  //
+  IniF.Free;
 end;
-// Reads a string from an .ini file
-function RIF_ReadString(Const FileName: String; Const AppName: String;
-          Const KeyName: String; Const DefaultStr: String): String;
-var a1: array [0..Pred(1024)] of Char;
+
+//
+// Saves new Host URL in .INI file
+//
+procedure WriteIniFileHost(const NewHostURL: string);
+var IniF: TIniFile;
 begin
-  a1[0]:=#00;   // Avoid compilation warnings
-  {$IFDEF UNICODE}GetPrivateProfileStringW{$ELSE}GetPrivateProfileStringA{$ENDIF}
-    (PChar(AppName),PChar(KeyName),PChar(DefaultStr),a1,SizeOf(a1),PChar(FileName));
-  result:=String(a1);
+  IniF:=TIniFile.Create(INI_FILE);
+  // New Host URL
+  IniF.WriteString(INI_OPTIONS,INI_OURL,NewHostURL);
+  //
+  IniF.Free;
 end;
 
 //
@@ -323,7 +327,7 @@ begin
   // If OK, immediate Ping test
   if Form1.Timer1.Enabled then
     // Simulates click for PushButton 4
-    PostMessage(Form1.Handle,WM_COMMAND,MAKEWPARAM(0,BN_CLICKED),Form1.Button4.Handle);
+    PostMessage(Form1.Button4.Parent.Handle,WM_COMMAND,MAKEWPARAM(0,BN_CLICKED),Form1.Button4.Handle);
 end;
 
 //

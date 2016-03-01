@@ -94,8 +94,8 @@ OutputDir=
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=
-Packages=
+SearchPath=.\LLCLUnits
+Packages=vcl;rtl;vclx;VclSmp;vclshlctrls
 Conditionals=
 DebugSourceDirs=
 UsePackages=0
@@ -130,3 +130,9 @@ OriginalFilename=
 ProductName=
 ProductVersion=1.0.0.0
 Comments=
+[HistoryLists\hlUnitAliases]
+Count=1
+Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
+[HistoryLists\hlSearchPath]
+Count=1
+Item0=.\LLCLUnits

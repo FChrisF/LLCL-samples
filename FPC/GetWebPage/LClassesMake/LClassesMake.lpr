@@ -8,7 +8,7 @@ program LClassesMake;
 // !! CAUTION !! Pascal files inside the directory in
 //   which this program is run are MODIFIED
 //
-// Copyright (c) 2015 ChrisF
+// Copyright (c) 2015-2016 ChrisF
 // Distributed under the terms of the MIT license: see LICENSE.txt
 //
 
