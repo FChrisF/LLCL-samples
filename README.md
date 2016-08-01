@@ -97,23 +97,23 @@ optimization level, icon files, FPC version ...
 
 |Project          | LCL (Lazarus 1.4.4) | LLCL Free Pascal | VCL (Delphi7) | LLCL Delphi |
 |:----------------|:-------------------:|:----------------:|:-------------:|:-----------:|
-|Demo LLCLTest(1) |       1721 Kb       |      141 Kb      |    464 Kb     |    89 Kb    |
-|CompFiles        |       1888 Kb       |      163 Kb      |    465 Kb     |   101 Kb    |
-|FileCRC          |       1696 Kb       |      141 Kb      |    402 Kb     |    90 Kb    |
-|MiniCalc         |       1652 Kb       |      118 Kb      |    379 Kb     |    75 Kb    |
-|PePing           |       1699 Kb       |      141 Kb      |     (3)       |    92 Kb    |
-|Visual(4)        |       1707 Kb       |      212 Kb      |    404 Kb     |   106 Kb    |
-|GetWebPage(2)    |       2237 Kb       |      813 Kb      |    830 Kb     |   590 Kb    |
+|Demo LLCLTest(1) |       1721 Kb       |      142 Kb      |    464 Kb     |    89 Kb    |
+|CompFiles        |       1887 Kb       |      164 Kb      |    463 Kb     |   100 Kb    |
+|FileCRC          |       1695 Kb       |      142 Kb      |    401 Kb     |    89 Kb    |
+|MiniCalc         |       1652 Kb       |      120 Kb      |    379 Kb     |    75 Kb    |
+|PePing           |       1699 Kb       |      142 Kb      |     (3)       |    92 Kb    |
+|Visual(4)        |       1707 Kb       |      213 Kb      |    404 Kb     |   106 Kb    |
+|GetWebPage(2)    |       2236 Kb       |      814 Kb      |    828 Kb     |   589 Kb    |
 
 |Project          | LCL (Lazarus 1.6.0) | LLCL Free Pascal |
 |:----------------|:-------------------:|:----------------:|
-|Demo LLCLTest(1) |       1726 Kb       |      129 Kb      |
-|CompFiles        |       1969 Kb       |      149 Kb      |
-|FileCRC          |       1702 Kb       |      129 Kb      |
-|MiniCalc         |       1662 Kb       |      108 Kb      |
-|PePing           |       1709 Kb       |      129 Kb      |
-|Visual(4)        |       1716 Kb       |      207 Kb      |
-|GetWebPage(2)    |       2077 Kb       |      776 Kb      |
+|Demo LLCLTest(1) |       1587 Kb       |      129 Kb      |
+|CompFiles        |       1803 Kb       |      150 Kb      |
+|FileCRC          |       1564 Kb       |      130 Kb      |
+|MiniCalc         |       1527 Kb       |      109 Kb      |
+|PePing           |       1572 Kb       |      130 Kb      |
+|Visual(4)        |       1578 Kb       |      208 Kb      |
+|GetWebPage(2)    |       2076 Kb       |      777 Kb      |
 
 
 Notes:
