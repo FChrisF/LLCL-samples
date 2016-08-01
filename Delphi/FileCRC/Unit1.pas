@@ -16,11 +16,9 @@ unit Unit1;
 
 interface
 
-{$IOCHECKS OFF}                 // Don't crash if File Error
-
 uses
-  Classes, SysUtils, Forms, Controls, StdCtrls, Dialogs, ExtCtrls,
-  {$IFNDEF FPC} XPMan{$ELSE} LazUTF8{$ENDIF};
+  Classes, SysUtils, Forms, Controls, StdCtrls, Dialogs, ExtCtrls
+  {$IFNDEF FPC}, XPMan{$ENDIF};
 
 type
 
@@ -62,7 +60,14 @@ implementation
 {$ENDIF}
 {$DEFINE USE_THREAD}          // Use thread for CRC and hash computes
 
+{$if Defined(FPC) and (not Defined(UNICODE))}
+  {$DEFINE USE_FPC_UTF8_FILEFUNC}
+{$ifend}
+
 uses
+{$IFDEF USE_FPC_UTF8_FILEFUNC}
+  LazFileUtils,
+{$ENDIF}
 {$IFDEF USE_FPC_CRCHASH}
   MD5, SHA1, CRC;
 {$ELSE}
@@ -294,9 +299,8 @@ end;
 //   Computes CRC32 value, and eventually MD5/SHA-1 hashes
 //
 procedure DoCRCHashFile(Const FileName: String; Const MD5Too: Boolean; Const SHA1Too: Boolean; Var ResType: Integer; Var ResStr: String);
-var sFileName: string;
 var LenFile,SaveLenFile: Int64;
-var LenToRead: Longword;
+var LenToRead: Integer;
 var FileError: Integer;
 var CRC32Val: Longword;
 var FBuffer: array [0..Pred(8192)] of Byte;
@@ -309,15 +313,13 @@ var DigestSHA1: TSHA1Digest;
 var HFMD5Ctx: MD5_CTX;
 var HFSHA1Ctx: SHA1_CTX;
 {$ENDIF}
+var HFile: THandle;
 var Digest: array [0..Pred(20)] of Byte;    // Longest of MD5/SHA-1
-var i1: Longword;
-var F1: File;
 var s1: String;
 begin
   ResType:=1;   // (error by default)
   // Error, if file absent
-  sFileName:={$if Defined(FPC) and not Defined(UNICODE)}UTF8ToSys(FileName){$else}FileName{$ifend};
-  if not FindFileSize(sFileName,LenFile) then
+  if not FindFileSize(FileName,LenFile) then
     begin
       ResStr:=' File missing: '+FileName;
       Exit;
@@ -326,11 +328,8 @@ begin
   SaveLenFile:=LenFile;
   FileError:=0;
   // Opens file (read only mode)
-  AssignFile(F1,sFileName);
-  FileMode:=fmOpenRead;
-  IOResult();
-  Reset(F1,1);
-  if IOResult()<>0 then
+  HFile := {$IFDEF USE_FPC_UTF8_FILEFUNC}FileOpenUTF8{$ELSE}FileOpen{$ENDIF}(FileName,fmOpenRead);
+  if HFile=THandle(-1) then
     // Error, if can't open it
     FileError:=10
   else
@@ -340,7 +339,6 @@ begin
       if MD5Too then MD5Init(HFMD5Ctx);
       if SHA1Too then SHA1Init(HFSHA1Ctx);
       // Processes file 'till end of file
-      s1:=IntToStr(SaveLenFile);
       while LenFile<>0 do
         begin
           {$IFDEF USE_THREAD}
@@ -354,8 +352,7 @@ begin
           // Reads file data by blocks
           LenToRead:=SizeOf(FBuffer);
           if LenToRead>LenFile then LenToRead:=LenFile;
-          BlockRead(F1,FBuffer,LenToRead,i1);
-          if (IOResult()<>0) or (i1<>LenToRead) then
+          if FileRead(HFile, FBuffer, LenToRead) <> LenToRead then
             begin
               // Error, if can't read it
               FileError:=1;
@@ -376,7 +373,7 @@ begin
       if FileError=0 then
         begin
           // CRC32 value
-          s1:=' Processed File: '+FileName+' ('+s1+' bytes)'+
+          s1:=' Processed File: '+FileName+' ('+IntToStr(SaveLenFile)+' bytes)'+
               sLineBreak+sLineBreak+sLineBreak+' CRC32 Value: '+
               IntToHex(CRC32Val,8)+sLineBreak+sLineBreak;
           // Plus hashes, if selected by user
@@ -405,7 +402,7 @@ begin
           ResStr:=s1;
         end;
       // Finally, closes file
-      CloseFile(F1);
+      FileClose(HFile);
     end;
   // Error(s) ?
   if FileError<>0 then
@@ -433,10 +430,9 @@ var SR: TSearchRec;
 {$ifend}
 begin
   Result:=False;
-  if FindFirst(FileName,faAnyFile,SR)<>0 then
-    exit;
+  if {$IFDEF USE_FPC_UTF8_FILEFUNC}FindFirstUTF8{$ELSE}FindFirst{$ENDIF}(FileName,faAnyFile,SR)<>0 then exit;
   LenFile:=SR.Size;
-  FindClose(SR);
+  SysUtils.FindClose(SR);
   Result:=True;
 end;
 

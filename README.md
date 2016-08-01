@@ -19,6 +19,9 @@ and Free Pascal/Lazarus.
 compiled using the LLCL or the standard LCL/VCL (see for each
 sample in README.txt).
 
+  Some of the sample projects use icons from "FatCow Farm
+Fresh Icons": http://www.fatcow.com/free-icons .
+
 
 ## Using only the LLCL
 

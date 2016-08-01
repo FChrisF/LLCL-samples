@@ -23,8 +23,8 @@ unit Unit1;
 //      This is mandatory because Indy uses the standard
 //      Classes.pas file
 //
-// 2) The SysUtils.pas and IniFiles.pas files used must be the
-//      'standard' ones for Lazarus/FPC and Delphi (because of Indy):
+// 2) The SysUtils.pas, IniFiles.pas and Registry.pas files used must be
+//      the 'standard' ones for Lazarus/FPC and Delphi (because of Indy):
 //      so, delete or rename the ones coming from the LLCL units before
 //      the compilation
 //
@@ -46,8 +46,8 @@ unit Unit1;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, StdCtrls, Dialogs,
-  {$IFNDEF FPC} XPMan{$ELSE} LazUTF8{$ENDIF};
+  Classes, SysUtils, Forms, Controls, StdCtrls, Dialogs
+  {$IFNDEF FPC}, XPMan{$ENDIF};
 
 type
 
@@ -94,7 +94,14 @@ procedure FormLog(Const SS: String);
 
 implementation
 
+{$if Defined(FPC) and (not Defined(UNICODE))}
+  {$DEFINE USE_FPC_UTF8_FILEFUNC}
+{$ifend}
+
 uses
+{$IFDEF USE_FPC_UTF8_FILEFUNC}
+  LazFileUtils,
+{$ENDIF}
   Windows,
   IdHTTP, IdURI, IdCookieManager, IdCompressorZLib, IdSSLOpenSSL, IdLogFile,
   ShUnit;
@@ -201,7 +208,6 @@ begin
 end;
 
 procedure TForm1.Button4Click(Sender: TObject);
-var FName: String;
 var FSize: Int64;
 begin
   // Posts file data for Web page indicated by URL in Edit1
@@ -212,11 +218,10 @@ begin
   if not OpenDialog1.Execute then
     Exit;
   // Checks file and size, then loads it
-  FName:={$if Defined(FPC) and not Defined(UNICODE)}UTF8ToSys(OpenDialog1.FileName){$else}OpenDialog1.FileName{$ifend};
-  if not FindFileSize(FName,FSize) then
+  if not FindFileSize(OpenDialog1.FileName,FSize) then
     begin
       Form1.Memo1.Lines.Clear;
-      Form1.Memo1.Lines.Add(sLineBreak+' *** ERROR ***  No or empty input file: '+FName);
+      Form1.Memo1.Lines.Add(sLineBreak+' *** ERROR ***  No or empty input file: '+OpenDialog1.FileName);
       Exit;
     end;
   if FSize>SizeOf(PostBuffer) then
@@ -225,10 +230,10 @@ begin
       Form1.Memo1.Lines.Add(sLineBreak+' *** ERROR ***  Input file too big ('+IntToStr(SizeOf(PostBuffer))+' max)');
       Exit;
     end;
-  if not BFileLoad(FName,0,FSize,@PostBuffer) then
+  if not BFileLoad(OpenDialog1.FileName,0,FSize,@PostBuffer) then
     begin
       Form1.Memo1.Lines.Clear;
-      Form1.Memo1.Lines.Add(sLineBreak+' *** ERROR ***  Can''t load input file: '+FName);
+      Form1.Memo1.Lines.Add(sLineBreak+' *** ERROR ***  Can''t load input file: '+OpenDialog1.FileName);
       Exit;
     end;
   PostBufferLen:=FSize;
@@ -503,38 +508,32 @@ var SR: TUnicodeSearchRec;
 var SR: TSearchRec;
 {$ifend}
 begin
-  Result:=False;
-  if SysUtils.FindFirst(FileName,faAnyFile,SR)<>0 then
-    exit;
-  LenFile:=SR.Size;
+  Result := False;
+  if {$IFDEF USE_FPC_UTF8_FILEFUNC}FindFirstUTF8{$ELSE}FindFirst{$ENDIF}(FileName, faAnyFile, SR)<>0 then exit;
+  LenFile := SR.Size;
   SysUtils.FindClose(SR);
-  Result:=True;
+  Result := True;
 end;
 
 //
 // Loads (Part of) a Binary File in Buffer
 //
 function  BFileLoad(Const FileName: String; Const Posi: Longword; Const Len: Longword; Const Buffer: Pointer): Boolean;
-var HFile: File;
+var HFile: THandle;
 var i1: Longword;
 begin
-  Result:=False;
-  AssignFile(HFile,FileName);
-  FileMode:=fmOpenRead;
-  IOResult();
-  Reset(HFile,1);
-  if IOResult()=0 then
+  Result := False;
+  HFile := {$IFDEF USE_FPC_UTF8_FILEFUNC}FileOpenUTF8{$ELSE}FileOpen{$ENDIF}(FileName, fmOpenRead);
+  if HFile <> THandle(-1) then
     begin
-      Seek(HFile,Posi);
-      if IOResult()=0 then
+      if Posi=0 then i1:=0 else i1 := FileSeek(HFile, Posi, 0);    // From beginning
+      if i1=Posi then
         begin
-          BlockRead(HFile,Buffer^,Len,i1);
-          if ((IOResult()=0) and (i1=Len)) then Result:=True;
+          i1 := FileRead(HFile, Buffer^, Len);
+          Result := (i1=Len);
         end;
+      FileClose(HFile);
     end;
-  IOResult();
-  CloseFile(HFile);
-  Result:=Result and (IOResult()=0);
 end;
 
 end.

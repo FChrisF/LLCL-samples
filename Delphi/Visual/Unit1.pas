@@ -41,7 +41,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, StdCtrls, ExtCtrls, Dialogs,
-  Windows, Graphics, {$IFNDEF FPC}Messages, OpenGL, XPMan{$ELSE}GL, FileUtil{$ENDIF};
+  Windows, Graphics, {$IFNDEF FPC}Messages, OpenGL, XPMan{$ELSE}GL{$ENDIF};
 
 type
 

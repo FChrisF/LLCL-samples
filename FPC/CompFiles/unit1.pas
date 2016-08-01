@@ -20,11 +20,9 @@ unit Unit1;
 
 interface
 
-{$IOCHECKS OFF}                 // Don't crash if File Error
-
 uses
-  Classes, SysUtils, Forms, Controls, StdCtrls, ExtCtrls, ComCtrls,
-  {$IFNDEF FPC} XPMan{$ELSE} LazUTF8{$ENDIF};
+  Classes, SysUtils, Forms, Controls, StdCtrls, ExtCtrls, ComCtrls
+  {$IFNDEF FPC}, XPMan{$ENDIF};
 
 type
 
@@ -71,10 +69,17 @@ implementation
 {$DEFINE USE_THREAD}          // Use thread for the files compare
 {$DEFINE ERROR_STOP}          // Stop when one error found for a file
 
+{$if Defined(FPC) and (not Defined(UNICODE))}
+  {$DEFINE USE_FPC_UTF8_FILEFUNC}
+{$ifend}
+
 uses
   Unit2,
+{$IFDEF USE_FPC_UTF8_FILEFUNC}
+  LazFileUtils,
+{$ENDIF}
 {$IFDEF FPC}
-  Dialogs, LCLIntF, Messages, LazFileUtils;
+  Dialogs, LCLIntF, Messages;
 {$ELSE}
   FileCtrl, Windows, Messages;
 {$ENDIF}
@@ -205,7 +210,7 @@ begin
     begin
       if sDirName1[Length(sDirName1)]<>CHAR_BACKS then
         sDirName1 := sDirName1 + CHAR_BACKS;
-      if not {$IFDEF FPC}DirectoryExistsUTF8{$ELSE}DirectoryExists{$ENDIF}(sDirName1) then
+      if not {$IFDEF USE_FPC_UTF8_FILEFUNC}DirectoryExistsUTF8{$ELSE}DirectoryExists{$ENDIF}(sDirName1) then
         begin
           DispError('  Invalid or unknown directory 1');
           Exit;
@@ -216,7 +221,7 @@ begin
     begin
       if sDirName2[Length(sDirName2)]<>CHAR_BACKS then
         sDirName2 := sDirName2 + CHAR_BACKS;
-      if not {$IFDEF FPC}DirectoryExistsUTF8{$ELSE}DirectoryExists{$ENDIF}(sDirName2) then
+      if not {$IFDEF USE_FPC_UTF8_FILEFUNC}DirectoryExistsUTF8{$ELSE}DirectoryExists{$ENDIF}(sDirName2) then
         begin
           DispError('  Invalid or unknown directory 2');
           Exit;
@@ -535,7 +540,6 @@ var LenSameFiles: Integer;
 var Ind1, Ind2: Integer;
 var i1, i2, i3, i4: Integer;
 var fs1, fs2: TFileSize;
-var fn1, fn2: String;
 begin
   NbrSameFiles := 0;
   {$IFDEF USE_THREAD}
@@ -575,10 +579,7 @@ begin
             if fs2>fs1 then
               Break;
           // Compare these 2 files with the same size
-          fn1 := {$if Defined(FPC) and not Defined(UNICODE)}UTF8ToSys(DirName1 + FilesDir1[Ind1].FileName){$else}DirName1 + FilesDir1[Ind1].FileName{$ifend};
-          fn2 := {$if Defined(FPC) and not Defined(UNICODE)}UTF8ToSys(DirName2 + FilesDir2[Ind2].FileName){$else}DirName2 + FilesDir2[Ind2].FileName{$ifend};
-          // (DirNames are already converted)
-          i3 := Compare2Files(fn1, fn2, fs1, FileNameErrorType);
+          i3 := Compare2Files(DirName1 + FilesDir1[Ind1].FileName, DirName2 + FilesDir2[Ind2].FileName, fs1, FileNameErrorType);
           if i3<0 then      // Error
             begin
             {$IFDEF ERROR_STOP}
@@ -640,31 +641,25 @@ end;
 //   Returns : 0=Identical Files, 1=Different Files, -20=Comparison Aborted, <0=Error
 //
 function  Compare2Files(Const FileName1: String; Const FileName2: String; Const FilesSize: TFileSize; Var FileNameErrorType: Integer): Integer;
-var File1, File2: File;
+var HFile1, HFile2: THandle;
 var FilesRest, FileBufSize: TFileSize;
-var i1, i2: Integer;
+var i1: Integer;
 begin
 	// Nul Length Files
 	Result := 0;
 	if FilesSize=0 then Exit;
 	// Data
   FilesRest := FilesSize;
-	AssignFile(File1, FileName1);
-	FileMode := fmOpenRead;				    // ReadOnly
-	IOResult();
-	Reset(File1, 1);
-	if IOResult()<>0 then
+  HFile1 := {$IFDEF USE_FPC_UTF8_FILEFUNC}FileOpenUTF8{$ELSE}FileOpen{$ENDIF}(FileName1, fmOpenRead or fmShareDenyWrite);
+  if HFile1=THandle(-1) then
     begin
 		  Result := -1;
       FileNameErrorType := 1;
     end
   else
 		begin
-			AssignFile(File2, FileName2);
-			FileMode := fmOpenRead;				// ReadOnly
-			IOResult();
-			Reset(File2, 1);
-			if IOResult()<>0 then
+      HFile2 := {$IFDEF USE_FPC_UTF8_FILEFUNC}FileOpenUTF8{$ELSE}FileOpen{$ENDIF}(FileName2, fmOpenRead or fmShareDenyWrite);
+      if HFile2=THandle(-1) then
         begin
     		  Result := -1;
           FileNameErrorType := 2;
@@ -689,15 +684,13 @@ begin
               Dec(FilesRest, i1);
               if i1>0 then
                 begin
-									BlockRead(File1, gFBuffer1, i1, i2);
-									if (IOResult()<>0) or (i2<>i1) then
+                  if FileRead(HFile1, gFBuffer1, i1) <> i1 then
 										begin
 											Result := -2;
                       FileNameErrorType := 1;
 											Break;
 										end;
-									BlockRead(File2, gFBuffer2, i1, i2);
-									if (IOResult()<>0) or (i2<>i1) then
+                  if FileRead(HFile2, gFBuffer2, i1) <> i1 then
 										begin
 											Result := -2;
                       FileNameErrorType := 2;
@@ -711,9 +704,9 @@ begin
                 end;
               FileBufSize := FILEBUF_SIZE2;
             end;
-					CloseFile(File2);
+					FileClose(HFile2);
 				end;
-			CloseFile(File1);
+			FileClose(HFile1);
     end;
 end;
 
@@ -721,13 +714,16 @@ end;
 //	Load Files List from Directory
 //
 function  LoadDir(Const DirName: String; Var FilesDir: Files_DirArr; Var NbrFilesDir: Integer): Boolean;
+{$if Defined(FPC) and Defined(UNICODE)}
+var SR: TUnicodeSearchRec;
+{$else}
 var SR: TSearchRec;
+{$ifend}
 var LenFilesDir: Integer;
 begin
 	Result := True;
 	NbrFilesDir := 0;
-  if {$IFDEF FPC}FindFirstUTF8{$ELSE}FindFirst{$ENDIF}(DirName + FILESDIR_MASK, FILESDIR_ATTR, SR)<>0 then
-    Exit;
+  if {$IFDEF USE_FPC_UTF8_FILEFUNC}FindFirstUTF8{$ELSE}FindFirst{$ENDIF}(DirName + FILESDIR_MASK, FILESDIR_ATTR, SR)<>0 then Exit;
 	SetLength(FilesDir, FILESDIR_INC);
 	LenFilesDir := FILESDIR_INC;
 	while True do
@@ -746,8 +742,7 @@ begin
     	FilesDir[NbrFilesDir].FileName := String(SR.Name);
     	FilesDir[NbrFilesDir].FileSize := SR.Size;
 			Inc(NbrFilesDir);
-			if {$IFDEF FPC}FindNextUTF8{$ELSE}FindNext{$ENDIF}(SR)<>0 then
-        Break;
+			if {$IFDEF USE_FPC_UTF8_FILEFUNC}FindNextUTF8{$ELSE}FindNext{$ENDIF}(SR)<>0 then Break;
 		end;
 	SysUtils.FindClose(SR);
 end;

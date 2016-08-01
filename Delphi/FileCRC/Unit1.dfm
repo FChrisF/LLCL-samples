@@ -61,7 +61,7 @@ object Form1: TForm1
     Height = 19
     Alignment = taCenter
     AutoSize = False
-    Caption = 'Version 1.0 (D)'
+    Caption = 'Version 1.1 (D)'
     TabOrder = 6
   end
   object StaticText2: TStaticText

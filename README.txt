@@ -8,7 +8,7 @@
 compile with the Free Pascal/Lazarus Light LCL (LLCL).
 
   All the samples are distributed under the terms of the MIT
-license: see LICENSE.txt
+license: see LICENSE.txt.
 
   To use them with the LLCL, add the corresponding path for
 the LLCL files into these project options before compiling
@@ -19,6 +19,9 @@ and Free Pascal/Lazarus.
 
   Unless notified specifically, all the samples can be
 compiled using the LLCL or the standard LCL/VCL.
+
+  Some of the sample projects use icons from "FatCow Farm
+Fresh Icons": http://www.fatcow.com/free-icons .
 
 
 Using only the LLCL
